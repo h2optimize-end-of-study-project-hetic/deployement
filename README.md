@@ -73,3 +73,8 @@ sudo systemctl restart nginx
 
 scp "C:/Users/rapha/Desktop/Hetic/web3/h2opimize/database/backup/recorded_backup_250720251413.sql" joachim@admin-hetic.arcplex.tech:/etc/h2optimize
 docker exec -i postgres_prod psql -U admin -d recorded < /etc/h2optimize/production/recorded_backup_250720251413.sql
+
+
+
+echo "token" > /etc/h2optimize/.github_token
+chmod 600 /etc/h2optimize/.github_token
