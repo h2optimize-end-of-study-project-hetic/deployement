@@ -79,4 +79,6 @@ docker exec -i postgres_prod psql -U admin -d recorded < /etc/h2optimize/product
 echo "token" > /etc/h2optimize/.github_token
 chmod 600 /etc/h2optimize/.github_token
 
-chmod +x /etc/h2optimize/backup/backup.sh
+crontab -e
+0 22 * * * /etc/h2optimize/deployement/backup.sh >> /etc/h2optimize/deployement/backup.log 2>&1
+crontab -l
