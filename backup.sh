@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DATE=$(date +"%Y-%m-%d_%H-%M")
-BACKUP_DIR="/etc/h2optimize/backup"
+BACKUP_DIR="/etc/h2optimize/deployement/backup"
 FILENAME="postgres_backup_$DATE.sql"
 CONTAINER_NAME="postgres_prod"
 GIT_REPO_DIR="/etc/h2optimize/depoyement"
