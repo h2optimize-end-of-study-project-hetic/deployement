@@ -1,20 +1,17 @@
 #!/bin/bash
-set -e
 
+DATE=$(date +"%Y-%m-%d_%H-%M")
+BACKUP_DIR="/etc/h2optimize/deployement/backup"
+FILENAME="postgres_recorded_backup_$DATE.sql"
+CONTAINER_NAME="postgres_prod"
 GIT_REPO_DIR="/etc/h2optimize/deployement"
-BRANCH="main"
-TOKEN_FILE="/etc/h2optimize/.github_token"
-REMOTE_URL="https://github.com/h2optimize-end-of-study-project-hetic/deployement.git"
+BRANCH_NAME="main"
 
-GITHUB_TOKEN=$(cat $TOKEN_FILE)
+mkdir -p "$BACKUP_DIR"
+docker exec "$CONTAINER_NAME" pg_dump -U admin -d recorded -F p > "$BACKUP_DIR/$FILENAME"
+cp "$BACKUP_DIR/$FILENAME" "$GIT_REPO_DIR/backup"
 
-cd "$GIT_REPO_DIR"
-
-git remote set-url origin "https://${GITHUB_TOKEN}@github.com/h2optimize-end-of-study-project-hetic/deployement.git"
-git pull origin $BRANCH
-git add .
-DATE=$(date +"%Y-%m-%d %H:%M:%S")
-git commit -m "Backup automatique $DATE" || echo "Rien à committer"
-git push origin $BRANCH
-
-git remote set-url origin "$REMOTE_URL"
+cd "$GIT_REPO_DIR" || exit 1
+git add "$FILENAME"
+git commit -m "Backup PostgreSQL du $DATE"
+git push origin "$BRANCH_NAME"
