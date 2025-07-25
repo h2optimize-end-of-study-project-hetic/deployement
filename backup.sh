@@ -12,6 +12,6 @@ docker exec "$CONTAINER_NAME" pg_dump -U admin -d recorded -F p > "$BACKUP_DIR/$
 cp "$BACKUP_DIR/$FILENAME" "$GIT_REPO_DIR/backup"
 
 cd "$GIT_REPO_DIR" || exit 1
-git add "$FILENAME"
+git add "backup/$FILENAME"
 git commit -m "Backup PostgreSQL du $DATE"
 git push origin "$BRANCH_NAME"
