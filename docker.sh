@@ -24,10 +24,3 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 sudo docker run hello-world
 sudo docker --version
 sudo docker compose version
-
-if groups "$USER" | grep &>/dev/null "\bdocker\b"; then
-    echo "L'utilisateur $USER est déjà dans le groupe docker"
-else
-    echo "Ajout de $USER au groupe docker"
-    sudo usermod -aG docker "$USER"
-fi

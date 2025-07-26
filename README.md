@@ -1,55 +1,234 @@
-installer git make 
+# H₂Optimize - Déploiement
 
-installer docker 
+## Prérequis
 
-ajouter docker.sh 
-donne droit execution sudo chmod +x docker.sh
-executrer ./docker.sh
+* Git
+* Make
+* Docker
+* Nginx
 
+### Installation de Git
+
+```bash
+sudo apt install git
+```
+
+### Installation de Make
+
+```bash
+sudo apt install make
+```
+
+### Installation de Docker
+
+1. Ajouter le script `docker.sh` dans le projet.
+2. Donner les droits d'exécution :
+
+```bash
+sudo chmod +x docker.sh
+```
+
+3. Lancer le script :
+
+```bash
+./docker.sh
+```
+
+4. Ajouter l'utilisateur au groupe Docker :
+
+```bash
+sudo usermod -aG docker "$USER"
+```
+
+5. Authentification à GHCR (GitHub Container Registry) :
+
+```bash
 echo "<TOKEN>" | docker login ghcr.io -u <USERNAME> --password-stdin
+```
 
-ajouter .env, .env.local et Makefile 
 
-sudo apt install build-essential
-faire un make runpostgres lance postgres 
+### Installation de Nginx
 
-fait un make runpgadmin lance pgadmin 
+```bash
+sudo apt install nginx
+```
 
-ce connecter sur postgres 
-docker exec -it postgres bash 
+Vérifier l’état du service :
+
+```bash
+sudo systemctl status nginx
+```
+
+Activer Nginx au démarrage :
+
+```bash
+sudo systemctl enable nginx
+```
+
+
+## Installation de la base de données PostgreSQL
+
+1. Configurer les variables d’environnement dans un fichier `.env`.
+2. Lancer PostgreSQL :
+
+```bash
+make runpostgres
+```
+
+3. Connexion à PostgreSQL :
+
+```bash
+docker exec -it postgres bash
 psql -U admin -d postgres
+```
 
-ce connecter a pgadmin 
-aller sur localhost:8080
-rentrer email password pgadmin 
-enregistre la base postgres host postgres port 5432
+### Restauration d'une sauvegarde distante
+
+1. Transférer le fichier SQL via SSH :
+
+```bash
+scp <chemin/fichier.sql> <user>@<host>:<répertoire de destination>
+```
+
+2. Restaurer la base dans le conteneur :
+
+```bash
+docker exec -i <nom_conteneur> psql -U <utilisateur> -d <base> < <chemin/fichier.sql>
+```
+
+### Connexion au rapository GitHub
+
+1. Récupérer un jeton d'authentification.
+2. Créer un fichier `askpass.sh` contenant le jeton :
+```bash
+#!/bin/bash
+echo "github_pat_..."
+```
+3. Restreindre les droits en lecture/écriture/execution au propriétaire uniquement :
+
+```bash
+chmod 700 /etc/h2optimize/askpass.sh
+```
+
+### Mise en place d’un cron pour sauvegardes automatiques
+
+1. Configurer backup token 
+
+2. Editer le crontab :
+
+```bash
+crontab -e
+```
+
+Ajouter la ligne suivante :
+
+```cron
+0 22 * * * /etc/h2optimize/deployement/backup.sh >> /etc/h2optimize/deployement/backup.log 2>&1
+```
+
+3. Vérifier que la tâche est bien enregistrée :
+
+```bash
+crontab -l
+```
+
+4. Consulter les logs :
+
+```bash
+cat /etc/h2optimize/deployement/backup.log
+```
 
 
-lancer telegraf 
+## Installation de pgAdmin
+
+1. Configurer les variables d’environnement.
+2. Lancer pgAdmin :
+
+```bash
+make runpgadmin
+```
+
+3. Accéder via navigateur : `http://localhost:8080`
+   Identifiez-vous avec les identifiants définis dans `.env`.
+
+4. Ajouter un serveur dans pgAdmin :
+
+   * Name : (nom libre)
+   * Host : `postgres` (ou IP du conteneur)
+   * Port : `5432`
+   * Username : `admin`
+   * Password : `Changeme!1`
+
+
+## Installation de Telegraf
+
+1. Configurer les variables d’environnement.
+2. Lancer le connecteur :
+
+```bash
 make runconnector
+```
 
-joachim@htc-11:~/project$ sudo apt install python3
-joachim@htc-11:~/project$ sudo apt install python3.11-venv
+## Installation de Glances (optionnel)
 
+1. Installer Python :
 
+```bash
+sudo apt install python3 python3.11-venv
+```
+
+2. Créer et activer un environnement virtuel :
+
+```bash
 python3 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip setuptools wheel
+```
+
+3. Installer Glances :
+
+```bash
 pip install 'glances[all]'
+```
 
-python -m pip freeze > requirements.txt
-python -m pip install -r requirements.txt
+4. Lancer Glances :
 
+```bash
+glances -w
+```
 
+5. Désactiver l’environnement :
+
+```bash
+deactivate
+```
+
+## Configuration de Nginx
+
+1. Editer la configuration :
+
+```bash
 sudo nano /etc/nginx/sites-available/default
+```
+
+Contenu recommandé :
+
+```nginx
 server {
     listen 80;
     server_name _;
 
-    location /glances/ {
-
+    location /rc/ {
+        proxy_pass http://localhost:81/;
         proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /glances/ {
         proxy_pass http://localhost:61208/;
+        proxy_set_header Host $host;
         proxy_redirect off;
     }
 
@@ -63,22 +242,16 @@ server {
         proxy_redirect off;
     }
 }
+```
 
+2. Vérifier la configuration :
 
-
-
+```bash
 sudo nginx -t
+```
+
+3. Appliquer les changements :
+
+```bash
 sudo systemctl restart nginx
-
-
-scp "C:/Users/rapha/Desktop/Hetic/web3/h2opimize/database/backup/recorded_backup_250720251413.sql" joachim@admin-hetic.arcplex.tech:/etc/h2optimize
-docker exec -i postgres_prod psql -U admin -d recorded < /etc/h2optimize/production/recorded_backup_250720251413.sql
-
-
-
-echo "token" > /etc/h2optimize/.github_token
-chmod 600 /etc/h2optimize/.github_token
-
-crontab -e
-0 22 * * * /etc/h2optimize/deployement/backup.sh >> /etc/h2optimize/deployement/backup.log 2>&1
-crontab -l
+```

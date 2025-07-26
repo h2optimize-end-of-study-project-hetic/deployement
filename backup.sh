@@ -17,10 +17,8 @@ cp "$BACKUP_DIR/$FILENAME" "$GIT_REPO_DIR/backup"
 
 cd "$GIT_REPO_DIR" || exit 1
 
-
 git remote set-url origin "$GIT_REPO_URL"
 export GIT_ASKPASS="$GIT_ASKPASS_SCRIPT"
-
 
 git add "backup/$FILENAME"
 git commit -m "Backup PostgreSQL du $DATE"
