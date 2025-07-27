@@ -231,6 +231,8 @@ server {
     }
 
     location /glances/ {
+        auth_basic "Restricted Access";
+        auth_basic_user_file /etc/nginx/.htpasswd;
         proxy_pass http://localhost:61208/;
         proxy_set_header Host $host;
         proxy_redirect off;
@@ -259,3 +261,18 @@ sudo nginx -t
 ```bash
 sudo systemctl restart nginx
 ```
+
+4. Ajouter des crédentials
+- Installer apache2-utils
+
+```bash
+sudo apt install apache2-utils
+```
+- Créer un fichier .htpasswd
+```bash
+sudo htpasswd -c /etc/nginx/.htpasswd <username>
+
+>> New password:
+>> Re-type new password:
+>> Adding password for user <username>
+``` 
