@@ -109,6 +109,10 @@ echo "github_pat_..."
 ```bash
 chmod 700 /etc/h2optimize/askpass.sh
 ```
+4. Intéragir avec le repo distant en passant le token
+```bash
+GIT_ASKPASS=/etc/h2optimize/askpass.sh git pull
+```
 
 ### Mise en place d’un cron pour sauvegardes automatiques
 
