@@ -22,6 +22,7 @@ export GIT_ASKPASS="$GIT_ASKPASS_SCRIPT"
 
 git add "backup/$FILENAME"
 git commit -m "Backup PostgreSQL du $DATE"
+git pull
 git push origin "$BRANCH_NAME"
 
 
