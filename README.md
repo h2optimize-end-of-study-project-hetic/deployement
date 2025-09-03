@@ -1,6 +1,6 @@
 # H₂Optimize - Déploiement
 
-test 
+ssh admin-hetic.arcplex.tech 
 
 ## Prérequis
 
@@ -209,6 +209,13 @@ glances -w
 deactivate
 ```
 
+### Tout lancer en une commande
+
+```
+source /etc/h2optimize/venv/bin/activate && glances -w
+
+```
+
 ## Configuration de Nginx
 
 1. Editer la configuration :
@@ -216,6 +223,7 @@ deactivate
 ```bash
 sudo nano /etc/nginx/sites-available/default
 ```
+
 
 Contenu recommandé :
 
